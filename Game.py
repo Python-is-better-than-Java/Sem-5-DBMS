@@ -3,14 +3,14 @@ from pygame.font import SysFont
 import time
 pygame.init()
 
-def check_dir(p_dir):
-    if (p_dir == 0):
-        return (0, -1)
-    elif (p_dir == 1):
+def check_dir(p_dir): # To check which direction player is facing
+    if (p_dir == 0):   # Player facing up
+        return (0, -1) 
+    elif (p_dir == 1): # Player facing left
         return (-1, 0)
-    elif (p_dir == 2):
+    elif (p_dir == 2): # Player facing down
         return (0, 1)
-    else:
+    else:              # Player facing right
         return (1, 0)
 
 def gameplay(screen, player_name):
@@ -34,10 +34,10 @@ def gameplay(screen, player_name):
     enemy_blue = [pygame.transform.scale(enemy1_blue, (100, 100)), pygame.transform.scale(enemy2_blue, (100, 100))] # Blue enemy images
     enemy_blue_rect = [pygame.Rect([10, 10, 100, 100]), pygame.Rect([10, 200, 100, 100])] # add new pygame.Rect here for blue enemies
 
-    bullet_coord = [] # coordinates of every bullet (can take inspiration of implementation to make enemy images move)
-    bullet_coord_rect = [] # Bullet rectangles so that collision can be checked with enemy rectangle
-    direction = 3
-    start = end = time.time()
+    bullet_coord = [] # coordinates of every bullet (can take inspiration of implementation to make enemy images move) -> [x_coord, y_coord, facing left/right, facing up/down, bullet image]
+    bullet_coord_rect = [] # Bullet rectangles (superimposed with bullet images always) so that collision can be checked with enemy rectangle
+    direction = 3  # used as p_dir arguement in check_dir, default facing right
+    start = end = time.time() # start reload time, end - start = number of seconds left to reload (in seconds)
     true = True
 
     while true == True:
@@ -66,25 +66,26 @@ def gameplay(screen, player_name):
             player.x = 475
             player.y = 325
 
-        if (key[pygame.K_1] and (end - start >= 0.75)):
+        if (key[pygame.K_1] and (end - start >= 0.75)): # pistol bullet fired
             bullet_coord.append([player.x + 25, player.y + 25, p_dir[0], p_dir[1], p_bullet[direction]])
             bullet_coord_rect.append(pygame.Rect(player.x + 25, player.y + 25, 20, 10))
             start = end
-        if (key[pygame.K_2] and (end - start >= 0.5)):
+        if (key[pygame.K_2] and (end - start >= 0.5)): # assault rifle bullet fired
             bullet_coord.append([player.x + 25, player.y + 25, p_dir[0], p_dir[1], a_bullet[direction]])
             bullet_coord_rect.append(pygame.Rect(player.x + 25, player.y + 25, 30, 10))
             start = end
-        if (key[pygame.K_3] and (end - start >= 2)):
+        if (key[pygame.K_3] and (end - start >= 2)): # sniper rifle bullet fired
             bullet_coord.append([player.x + 25, player.y + 25, p_dir[0], p_dir[1], s_bullet[direction]])
             bullet_coord_rect.append(pygame.Rect(player.x + 25, player.y + 25, 50, 10))
             start = end
 
         pygame.draw.ellipse(screen, (0, 125, 0), player)
+        
         for enemy in enemy_red:
             enemy_rect = enemy_red_rect[enemy_red.index(enemy)] # Get the red enemy rectangle from enemy_red_rect
             screen.blit(enemy, (enemy_rect.x, enemy_rect.y)) # display the red enemy character
             for bullet in bullet_coord:
-                screen.blit(bullet[4], (bullet[0], bullet[1]))
+                screen.blit(bullet[4], (bullet[0], bullet[1])) # bullet[4] = image, bullet[0] and bullet[1] are x_coord and y_coord respectively
                 bullet_rect = bullet_coord_rect[bullet_coord.index(bullet)]
 
                 if ((bullet[0] >= -50 and bullet[0] <= 1000) and (bullet[1] >= -50 and bullet[1] <= 700)):
