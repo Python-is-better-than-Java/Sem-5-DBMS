@@ -8,7 +8,7 @@ def check_dir(p_dir): # To check which direction player is facing
         return (0, -1) 
     elif (p_dir == 1): # Player facing left
         return (-1, 0)
-    elif (p_dir == 2): # Player facing down
+    elif (p_dir == 2): # Player facing dow
         return (0, 1)
     else:              # Player facing right
         return (1, 0)
