@@ -1,4 +1,5 @@
 import pygame
+from pygame.font import SysFont
 import time
 pygame.init()
 
@@ -12,7 +13,7 @@ def check_dir(p_dir):
     else:
         return (1, 0)
 
-def gameplay(screen):
+def gameplay(screen, player_name):
     pygame.display.set_caption("PRAAJEQT")
     game_map = pygame.Rect(0, 0, 1000, 700)
     player = pygame.Rect(475, 325, 50, 50)
@@ -100,6 +101,9 @@ def gameplay(screen):
                     bullet_coord.remove(bullet) # Remove bullet image
                     enemy_red_rect.remove(enemy_rect) # Remove red enemy rectangle
                     enemy_red.remove(enemy) # remove red enemy image
+        
+        PLAYER_NAME = SysFont("Calibri", 45).render(player_name, True, "White")
+        screen.blit(PLAYER_NAME, (500, 720)) # display player name below the game screen
         
         pygame.display.flip()
 #gameplay()
