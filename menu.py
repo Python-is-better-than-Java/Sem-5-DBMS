@@ -1,9 +1,15 @@
 import pygame
 from pygame.font import SysFont
+import webbrowser
+import mysql.connector
 from Game import gameplay
 pygame.init()
-screen = pygame.display.set_mode((1000, 700))
+screen = pygame.display.set_mode((1000, 800))
 pygame.display.set_caption("PRAAJEQT")
+
+# Create a connection object
+conn_new = mysql.connector.connect(host="localhost", user="root", password="mysql", database="shootergame")
+cursor_new = conn_new.cursor()
 
 class Button():
     def __init__(self, image, pos, text_input, font, base_color, hovering_color):
@@ -36,6 +42,89 @@ class Button():
         else:
             self.text = self.font.render(self.text_input, True, self.base_color)
 
+def login_page():
+    player_name = ''
+    password = ''
+    pswd_prev_len = len(password)
+    password_hash = ''
+    enter_again = ''
+    key = 0 # To change from entering username to entering password
+    player_rect = pygame.Rect(200, 120, 600, 60)
+    password_rect = pygame.Rect(200, 320, 600, 60)
+    colour = pygame.Color("Purple")
+    while True:
+        login_mouse_pos = pygame.mouse.get_pos()
+        screen.fill((125, 0, 0))
+
+        PLAY_TEXT = SysFont("Calibri", 45).render("Enter username of the player", True, "White")
+        PLAY_RECT = PLAY_TEXT.get_rect(center=(500, 50))
+        screen.blit(PLAY_TEXT, PLAY_RECT)
+
+        PASSWORD_TEXT = SysFont("Calibri", 45).render("Enter password", True, "White")
+        PASSWORD_RECT = PASSWORD_TEXT.get_rect(center=(500, 250))
+        screen.blit(PASSWORD_TEXT, PASSWORD_RECT)
+
+        AGAIN_TEXT = SysFont("Calibri", 30).render(enter_again, True, "White")
+        AGAIN_RECT = PLAY_TEXT.get_rect(center=(500, 700))
+        screen.blit(AGAIN_TEXT, AGAIN_RECT)
+
+        pygame.draw.rect(screen, colour, player_rect)
+        text_player_name = SysFont("Calibri", 50).render(player_name, True, (255, 255, 255)) 
+        screen.blit(text_player_name, (player_rect.x+5, player_rect.y+5))
+
+        pygame.draw.rect(screen, colour, password_rect)
+        text_password_hash = SysFont("Calibri", 50).render(password_hash, True, (255, 255, 255)) 
+        screen.blit(text_password_hash, (password_rect.x+5, password_rect.y+5))
+
+        START_BUTTON = Button(image=pygame.image.load("Rectangle.png"), pos=(500, 450), 
+                            text_input="Start", font=SysFont("Calibri", 70), base_color="#d7fcd4", hovering_color="Green")
+        START_BUTTON.changeColor(login_mouse_pos)
+        START_BUTTON.update(screen)
+        PLAY_BACK = Button(image=pygame.image.load("Rectangle.png"), pos=(500, 600), 
+                           text_input="Back", font=SysFont("Calibri", 70), base_color="#d7fcd4", hovering_color="Green")
+        PLAY_BACK.changeColor(login_mouse_pos)
+        PLAY_BACK.update(screen)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+      
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if PLAY_BACK.checkForInput(login_mouse_pos):
+                    home_screen()
+                if START_BUTTON.checkForInput(login_mouse_pos):
+                    # check if user exists in the player_profile table
+                    query = f"SELECT Username FROM player_profile WHERE Username = '{player_name}' AND Passkey = '{password}';"
+                    cursor_new.execute(query)
+                    results = cursor_new.fetchall()
+                    if (len(results) > 0):
+                        gameplay(screen, player_name)
+                    else:
+                        enter_again = "Incorrect username and/or password. Try Again."
+                        key = 0 # Reset to entering username
+
+                    
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE:
+                    if (key == 0):
+                        player_name = player_name[:-1]
+                    else:
+                        password = password[:-1]
+                        password_hash = password_hash[:-1]
+                        pswd_prev_len = len(password)
+                elif event.key == pygame.K_RETURN:
+                    key = 1  # Username entered, now enter password
+                else:
+                    if (key == 0):
+                        player_name += event.unicode # Unicode standard is used for string formation
+                    else:
+                        password += event.unicode
+                        if (len(password) == pswd_prev_len + 1):
+                            password_hash += '*'
+                            pswd_prev_len = len(password)
+
+        pygame.display.flip()
+
 def home_screen():
     while True:
         screen.fill((125, 0, 0))
@@ -61,16 +150,13 @@ def home_screen():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                #sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if PLAY_BUTTON.checkForInput(home_mouse_pos):
-                    gameplay(screen)
+                    login_page()
                 if TABLE_BUTTON.checkForInput(home_mouse_pos):
-                    #options()
-                    pass
+                    webbrowser.open("http://localhost:8501")
                 if QUIT_BUTTON.checkForInput(home_mouse_pos):
                     pygame.quit()
-                    #sys.exit()
 
         pygame.display.update()
 
