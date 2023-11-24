@@ -11,19 +11,29 @@ CREATE TABLE player_statistics(
     Accuracy FLOAT DEFAULT 0,
     Kills INT DEFAULT 0,
     Deaths INT DEFAULT 0,
+    Accuracy FLOAT,
+    Kills INT,
+    Deaths INT,
     FOREIGN KEY(Username) REFERENCES player_profile(Username) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE player_achievements(
 	Username VARCHAR(50) PRIMARY KEY,
+<<<<<<< HEAD
     Achievements VARCHAR(50) DEFAULT "",
+    Achievements VARCHAR(50),
+>>>>>>> 5ab62c06f7e35ac88dcfb9c7818862ecac1afc3e
     FOREIGN KEY(Username) REFERENCES player_profile(Username) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE Map(
 	M_type VARCHAR(50) PRIMARY KEY,
     Enemy_type VARCHAR(50),
+<<<<<<< HEAD
     Enemy_Colour LONGBLOB
+=======
+    Enemy_Colour VARCHAR(50)
+>>>>>>> 5ab62c06f7e35ac88dcfb9c7818862ecac1afc3e
 );
 
 CREATE TABLE Weapons(
@@ -41,9 +51,15 @@ CREATE TABLE Items(
 
 CREATE TABLE Leaderboard(
 	Username VARCHAR(50) PRIMARY KEY,
+<<<<<<< HEAD
     Accuracy FLOAT DEFAULT 0,
     Total_kills INT DEFAULT 0,
     Score DOUBLE DEFAULT 0,
+=======
+    Accuracy FLOAT,
+    Total_kills INT,
+    Score DOUBLE,
+>>>>>>> 5ab62c06f7e35ac88dcfb9c7818862ecac1afc3e
     FOREIGN KEY(Username) REFERENCES player_profile(Username) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
@@ -72,6 +88,7 @@ CREATE TABLE Found_In(
 
 DELIMITER &&
 CREATE TRIGGER UpdateLeaderboard
+<<<<<<< HEAD
 	BEFORE INSERT ON player_statistics
     FOR EACH ROW
     BEGIN 
@@ -103,3 +120,14 @@ CREATE PROCEDURE update_score(IN accuracy FLOAT, IN kills INT, IN cur_user VARCH
     UPDATE Leaderboard SET Score = Score + (accuracy*10 + total_kills) WHERE Username = cur_user;
     END; &&
 DELIMITER ;
+=======
+	AFTER INSERT ON player_statistics
+    FOR EACH ROW
+    BEGIN 
+    UPDATE Leaderboard SET Accuracy = (Accuracy+NEW.Accuracy)/2 WHERE Username = NEW.Username;
+    UPDATE Leaderboard SET Total_kills = (Total_kills + NEW.Kills) WHERE Username = NEW.Username;
+    UPDATE Leaderboard SET Score = (Total_kills + 10*Accuracy) WHERE Username = NEW.Username;
+    END; &&
+DELIMITER ;
+
+>>>>>>> 5ab62c06f7e35ac88dcfb9c7818862ecac1afc3e

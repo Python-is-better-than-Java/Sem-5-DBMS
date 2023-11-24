@@ -14,7 +14,7 @@ def check_dir(p_dir): # To check which direction player is facing
     else:              # Player facing right
         return (10, 0)
 
-def gameplay(screen, player_name, map_image):
+def gameplay(screen, player_name, map_image, enemy_colour):
     pygame.display.set_caption("PRAAJEQT")
     game_map = pygame.transform.scale(pygame.image.load(map_image), (1000, 700))
     player = pygame.Rect(475, 325, 50, 50)
@@ -23,23 +23,18 @@ def gameplay(screen, player_name, map_image):
     shots_hit = 0
     kills = 0
 
-    p_bullet = pygame.image.load("Pistol_bullet.png")
+    p_bullet = pygame.image.load("Bullets/Pistol_bullet.png")
     p_bullet = (pygame.transform.rotate(pygame.transform.scale(p_bullet, (20, 10)), 90), pygame.transform.rotate(pygame.transform.scale(p_bullet, (20, 10)), 180), pygame.transform.rotate(pygame.transform.scale(p_bullet, (20, 10)), 270), pygame.transform.scale(p_bullet, (20, 10)))
-    a_bullet = pygame.image.load("Assault_bullet.png")
+    a_bullet = pygame.image.load("Bullets/Assault_bullet.png")
     a_bullet = (pygame.transform.rotate(pygame.transform.scale(a_bullet, (30, 10)), 90), pygame.transform.rotate(pygame.transform.scale(a_bullet, (30, 10)), 180), pygame.transform.rotate(pygame.transform.scale(a_bullet, (30, 10)), 270), pygame.transform.scale(a_bullet, (30, 10)))
-    s_bullet = pygame.image.load("Sniper_bullet.png")
+    s_bullet = pygame.image.load("Bullets/Sniper_bullet.png")
     s_bullet = (pygame.transform.rotate(pygame.transform.scale(s_bullet, (50, 10)), 90), pygame.transform.rotate(pygame.transform.scale(s_bullet, (50, 10)), 180), pygame.transform.rotate(pygame.transform.scale(s_bullet, (50, 10)), 270), pygame.transform.scale(s_bullet, (50, 10)))
     
-    enemy1_red = pygame.image.load("Enemy1_red.png")
-    enemy1_blue = pygame.image.load("Enemy1_blue.png")
-    enemy2_red = pygame.image.load("Enemy2_red.png")
-    enemy2_blue = pygame.image.load("Enemy2_blue.png")
-    enemy_red = [pygame.transform.scale(enemy1_red, [100, 100]), pygame.transform.scale(enemy2_red, [100, 100])] # Red enemy images
-    enemy_red_rect = [pygame.Rect([200, 10, 100, 100]), pygame.Rect([200, 200, 100, 100])] # add new pygame.Rect here for red enemies
-    enemy_red_health = [200, 200]
-    enemy_blue = [pygame.transform.scale(enemy1_blue, (100, 100)), pygame.transform.scale(enemy2_blue, (100, 100))] # Blue enemy images
-    enemy_blue_rect = [pygame.Rect([10, 10, 100, 100]), pygame.Rect([10, 200, 100, 100])] # add new pygame.Rect here for blue enemies
-
+    enemy1 = pygame.image.load(f"Enemies/{enemy_colour}/Enemy1.jpg")
+    enemy2 = pygame.image.load(f"Enemies/{enemy_colour}/Enemy2.jpg")
+    enemy = [pygame.transform.scale(enemy1, [100, 100]), pygame.transform.scale(enemy2, [100, 100])] # Red enemy images
+    enemy_rect = [pygame.Rect([200, 10, 100, 100]), pygame.Rect([200, 200, 100, 100])] # add new pygame.Rect here for red enemies
+    enemy_health = [200, 200]
     bullet_coord = [] # coordinates of every bullet (can take inspiration of implementation to make enemy images move) -> [x_coord, y_coord, facing left/right, facing up/down, bullet image]
     bullet_coord_rect = [] # Bullet rectangles (superimposed with bullet images always) so that collision can be checked with enemy rectangle
     direction = 3  # used as p_dir arguement in check_dir, default facing right
@@ -91,20 +86,20 @@ def gameplay(screen, player_name, map_image):
 
         pygame.draw.ellipse(screen, (0, 125, 0), player)
         
-        for enemy in enemy_red:
-            enemy_rect = enemy_red_rect[enemy_red.index(enemy)] # Get the red enemy rectangle from enemy_red_rect
-            screen.blit(enemy, (enemy_rect.x, enemy_rect.y)) # display the red enemy character
+        for enemy_i in enemy:
+            enemy_rect_i = enemy_rect[enemy.index(enemy_i)] # Get the red enemy rectangle from enemy_red_rect
+            screen.blit(enemy_i, (enemy_rect_i.x, enemy_rect_i.y)) # display the red enemy character
 
-            if(abs(enemy_rect.x - player.x) >= abs(enemy_rect.y - player.y)):
-                if(enemy_rect.x - player.x < 0):
-                    enemy_rect.x += 3
+            if(abs(enemy_rect_i.x - player.x) >= abs(enemy_rect_i.y - player.y)):
+                if(enemy_rect_i.x - player.x < 0):
+                    enemy_rect_i.x += 3
                 else:
-                    enemy_rect.x -= 3
+                    enemy_rect_i.x -= 3
             else:
-                if(enemy_rect.y - player.y < 0):
-                    enemy_rect.y += 3
+                if(enemy_rect_i.y - player.y < 0):
+                    enemy_rect_i.y += 3
                 else:
-                    enemy_rect.y -= 3
+                    enemy_rect_i.y -= 3
 
             for bullet in bullet_coord:
                 screen.blit(bullet[4], (bullet[0], bullet[1])) # bullet[4] = image, bullet[0] and bullet[1] are x_coord and y_coord respectively
@@ -119,18 +114,18 @@ def gameplay(screen, player_name, map_image):
                     bullet_coord.remove(bullet)
                     bullet_coord_rect.remove(bullet_rect)
             
-                if (bullet_rect.colliderect(enemy_rect)): # bullet collide with enemy
+                if (bullet_rect.colliderect(enemy_rect_i)): # bullet collide with enemy
                     bullet_coord_rect.remove(bullet_rect) # Remove bullet rectangle
                     bullet_coord.remove(bullet) # Remove bullet image
-                    if enemy_red_health[enemy_red.index(enemy)] == 0:
-                        enemy_red_rect.remove(enemy_rect) # Remove red enemy rectangle
-                        enemy_red.remove(enemy) # remove red enemy image
+                    if enemy_health[enemy.index(enemy_i)] == 0:
+                        enemy_rect.remove(enemy_rect_i) # Remove red enemy rectangle
+                        enemy.remove(enemy_i) # remove red enemy image
                         kills += 1
                     else:
-                        enemy_red_health[enemy_red.index(enemy)] -= 50
+                        enemy_health[enemy.index(enemy_i)] -= 50
                     shots_hit += 1
             
-            if(enemy_rect.colliderect(player)):
+            if(enemy_rect_i.colliderect(player)):
                 if(player_health != 0):
                     player_health -= 10
                 else:
@@ -145,11 +140,24 @@ def gameplay(screen, player_name, map_image):
 
 def game_over(screen, shots_fired, shots_hit, kills, player_name):
     accuracy = shots_hit/shots_fired if shots_fired > 0 else 0
-    conn = mysql.connector.connect(host="localhost", user="root", password="mysql", database="shootergame")
+    conn = mysql.connector.connect(host="localhost", user="root", password="S@ah1th!", database="shootergame")
     cur = conn.cursor()
-    query = f"INSERT INTO player_statistics VALUES ('{player_name}', {accuracy}, {kills}, 1);"
+    query = f"SELECT Username FROM player_statistics WHERE Username = '{player_name}';"
     cur.execute(query)
-    conn.commit()
+    results = cur.fetchall()
+    if len(results) == 0:
+        query = f"INSERT INTO player_statistics VALUES('{player_name}', {accuracy}, {kills}, 1);"
+        cur.execute(query)
+        conn.commit()
+    else:
+        query = f"UPDATE player_statistics SET Accuracy = {accuracy} WHERE Username = '{player_name}';"
+        cur.execute(query)
+        conn.commit()
+
+        query = f"UPDATE player_statistics SET Kills = {kills} WHERE Username = '{player_name}';"
+        cur.execute(query)
+        conn.commit()
+        
     while True:
         screen.fill((125, 0, 0))
         game_over_text = SysFont("Calibri", 70).render("Game Over", True, "White")

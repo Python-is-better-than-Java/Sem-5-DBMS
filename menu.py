@@ -8,7 +8,7 @@ screen = pygame.display.set_mode((1000, 770))
 pygame.display.set_caption("PRAAJEQT")
 
 # Create a connection object
-conn_new = mysql.connector.connect(host="localhost", user="root", password="mysql", database="shootergame")
+conn_new = mysql.connector.connect(host="localhost", user="root", password="S@ah1th!", database="shootergame")
 cursor_new = conn_new.cursor()
 
 class Button():
@@ -227,7 +227,7 @@ def map_mode_page(player_name):
         DESERT_BUTTON = Button(image=pygame.image.load("Rectangle.png"), pos=(500, 200), 
                             text_input="Desert", font=SysFont("Calibri", 70), base_color="#d7fcd4", hovering_color="Green")
         GRASSLAND_BUTTON = Button(image=pygame.image.load("Rectangle.png"), pos=(500, 350), 
-                            text_input="Grassland", font=SysFont("Calibri", 70), base_color="#d7fcd4", hovering_color="Green")
+                            text_input="Grass", font=SysFont("Calibri", 70), base_color="#d7fcd4", hovering_color="Green")
         ICE_BUTTON = Button(image=pygame.image.load("Rectangle.png"), pos=(500, 500),
                             text_input="Ice", font=SysFont("Calibri", 70), base_color="#d7fcd4", hovering_color="Green")
 
@@ -242,11 +242,20 @@ def map_mode_page(player_name):
                 pygame.quit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if DESERT_BUTTON.checkForInput(home_mouse_pos):
-                    gameplay(screen, player_name, "DesertMap.jpg")
+                    query = f"SELECT Enemy_Colour FROM Map WHERE M_type = 'Desert';"
+                    cursor_new.execute(query)
+                    result = cursor_new.fetchall()
+                    gameplay(screen, player_name, "Map/DesertMap.jpg", str(result[0][0]))
                 if GRASSLAND_BUTTON.checkForInput(home_mouse_pos):
-                    gameplay(screen, player_name, "GrasslandMap.jpg")
+                    query = f"SELECT Enemy_Colour FROM Map WHERE M_type = 'Grass';"
+                    cursor_new.execute(query)
+                    result = cursor_new.fetchall()
+                    gameplay(screen, player_name, "Map/GrassMap.jpg", str(result[0][0]))
                 if ICE_BUTTON.checkForInput(home_mouse_pos):
-                    gameplay(screen, player_name, "IceMap.jpg")
+                    query = f"SELECT Enemy_Colour FROM Map WHERE M_type = 'Ice';"
+                    cursor_new.execute(query)
+                    result = cursor_new.fetchall()
+                    gameplay(screen, player_name, "Map/IceMap.jpg", str(result[0][0]))
 
         pygame.display.update()
 
