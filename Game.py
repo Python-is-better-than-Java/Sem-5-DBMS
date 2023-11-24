@@ -23,11 +23,11 @@ def gameplay(screen, player_name):
     shots_hit = 0
     kills = 0
 
-    p_bullet = pygame.image.load("Pistol_bullet.png")
+    p_bullet = pygame.image.load("/Bullets/Pistol_bullet.png")
     p_bullet = (pygame.transform.rotate(pygame.transform.scale(p_bullet, (20, 10)), 90), pygame.transform.rotate(pygame.transform.scale(p_bullet, (20, 10)), 180), pygame.transform.rotate(pygame.transform.scale(p_bullet, (20, 10)), 270), pygame.transform.scale(p_bullet, (20, 10)))
-    a_bullet = pygame.image.load("Assault_bullet.png")
+    a_bullet = pygame.image.load("Bullets/Assault_bullet.png")
     a_bullet = (pygame.transform.rotate(pygame.transform.scale(a_bullet, (30, 10)), 90), pygame.transform.rotate(pygame.transform.scale(a_bullet, (30, 10)), 180), pygame.transform.rotate(pygame.transform.scale(a_bullet, (30, 10)), 270), pygame.transform.scale(a_bullet, (30, 10)))
-    s_bullet = pygame.image.load("Sniper_bullet.png")
+    s_bullet = pygame.image.load("Bullets/Sniper_bullet.png")
     s_bullet = (pygame.transform.rotate(pygame.transform.scale(s_bullet, (50, 10)), 90), pygame.transform.rotate(pygame.transform.scale(s_bullet, (50, 10)), 180), pygame.transform.rotate(pygame.transform.scale(s_bullet, (50, 10)), 270), pygame.transform.scale(s_bullet, (50, 10)))
     
     enemy1_red = pygame.image.load("Enemy1_red.png")
@@ -147,9 +147,19 @@ def game_over(screen, shots_fired, shots_hit, kills, player_name):
     accuracy = shots_hit/shots_fired if shots_fired > 0 else 0
     conn = mysql.connector.connect(host="localhost", user="root", password="S@ah1th!", database="shootergame")
     cur = conn.cursor()
-    query = f"INSERT INTO player_statistics VALUES ('{player_name}', {accuracy}, {kills}, 1);"
+    query = f"SELECT Username FROM player_statistics WHERE Username = '{player_name}';"
     cur.execute(query)
-    conn.commit()
+    results = cur.fetchall()
+    if len(results) == 0:
+        query = f"INSERT INTO player_statistics VALUES('{player_name}', {accuracy}, {kills}, 1);"
+        cur.execute(query)
+        conn.commit()
+    else:
+        query = f"""UPDATE player_statistics SET Accuracy = {accuracy};
+                    UPDATE player_statistics SET Kills = {kills};"""
+        cur.execute(query)
+        conn.commit()
+        
     while True:
         screen.fill((125, 0, 0))
         game_over_text = SysFont("Calibri", 70).render("Game Over", True, "White")
