@@ -8,7 +8,7 @@ screen = pygame.display.set_mode((1000, 770))
 pygame.display.set_caption("PRAAJEQT")
 
 # Create a connection object
-conn_new = mysql.connector.connect(host="localhost", user="root", password="mysql", database="shootergame")
+conn_new = mysql.connector.connect(host="localhost", user="root", password="S@ah1th!", database="shootergame")
 cursor_new = conn_new.cursor()
 
 class Button():
@@ -177,17 +177,21 @@ def signup_page():
                     home_screen()
                 if DONE_BUTTON.checkForInput(signup_mouse_pos):
                     # check if user exists in the player_profile table
-                    query = f"SELECT Username FROM player_profile WHERE Username = '{player_name}';"
-                    cursor_new.execute(query)
-                    results = cursor_new.fetchall()
-                    if (len(results) == 0):
-                        insert_query = f"INSERT INTO player_profile VALUES('{player_name}', '{password}');"
-                        cursor_new.execute(insert_query)
-                        conn_new.commit()
-                        home_screen()
+                    if player_name != "" or password != "":
+                        query = f"SELECT Username FROM player_profile WHERE Username = '{player_name}';"
+                        cursor_new.execute(query)
+                        results = cursor_new.fetchall()
+                        if (len(results) == 0):
+                            insert_query = f"INSERT INTO player_profile VALUES('{player_name}', '{password}');"
+                            cursor_new.execute(insert_query)
+                            conn_new.commit()
+                            home_screen()
+                        else:
+                            enter_again = "Username already exists. Try Again."
+                            key = 0 # Reset to entering username
                     else:
-                        enter_again = "Username already exists. Try Again."
-                        key = 0 # Reset to entering username
+                        enter_again = "Please enter a valid username password combination."
+                        key = 0
 
                     
             if event.type == pygame.KEYDOWN:
@@ -249,5 +253,6 @@ def home_screen():
                     pygame.quit()
 
         pygame.display.update()
+
 
 home_screen()

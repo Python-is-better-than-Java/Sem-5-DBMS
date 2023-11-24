@@ -8,22 +8,22 @@ CREATE TABLE player_profile(
 
 CREATE TABLE player_statistics(
 	Username VARCHAR(50) PRIMARY KEY,
-    Accuracy FLOAT,
-    Kills INT,
-    Deaths INT,
+    Accuracy FLOAT DEFAULT 0,
+    Kills INT DEFAULT 0,
+    Deaths INT DEFAULT 0,
     FOREIGN KEY(Username) REFERENCES player_profile(Username) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE player_achievements(
 	Username VARCHAR(50) PRIMARY KEY,
-    Achievements VARCHAR(50),
+    Achievements VARCHAR(50) DEFAULT "",
     FOREIGN KEY(Username) REFERENCES player_profile(Username) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE Map(
 	M_type VARCHAR(50) PRIMARY KEY,
     Enemy_type VARCHAR(50),
-    Enemy_Colour VARCHAR(50)
+    Enemy_Colour LONGBLOB
 );
 
 CREATE TABLE Weapons(
@@ -41,9 +41,9 @@ CREATE TABLE Items(
 
 CREATE TABLE Leaderboard(
 	Username VARCHAR(50) PRIMARY KEY,
-    Accuracy FLOAT,
-    Total_kills INT,
-    Score DOUBLE,
+    Accuracy FLOAT DEFAULT 0,
+    Total_kills INT DEFAULT 0,
+    Score DOUBLE DEFAULT 0,
     FOREIGN KEY(Username) REFERENCES player_profile(Username) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
@@ -72,12 +72,34 @@ CREATE TABLE Found_In(
 
 DELIMITER &&
 CREATE TRIGGER UpdateLeaderboard
-	AFTER INSERT ON player_statistics
+	BEFORE INSERT ON player_statistics
     FOR EACH ROW
     BEGIN 
+    DECLARE new_accuracy FLOAT;
+    DECLARE new_kills INT;
+    DECLARE cur_user VARCHAR(50);
     UPDATE Leaderboard SET Accuracy = (Accuracy+NEW.Accuracy)/2 WHERE Username = NEW.Username;
     UPDATE Leaderboard SET Total_kills = (Total_kills + NEW.Kills) WHERE Username = NEW.Username;
-    UPDATE Leaderboard SET Score = (Total_kills + 10*Accuracy) WHERE Username = NEW.Username;
+    SELECT Accuracy INTO new_accuracy FROM Leaderboard WHERE Username = NEW.Username;
+    SELECT Total_kills INTO new_kills FROM Leaderboard WHERE Username = NEW.Username;
+    SELECT Username INTO cur_user FROM Leaderboard WHERE Username = NEW.Username;
+    CALL update_score(new_accuracy, new_kills, cur_user);
     END; &&
 DELIMITER ;
 
+DELIMITER &&
+CREATE TRIGGER UpdateRequirements
+	AFTER INSERT ON player_profile
+    FOR EACH ROW
+    BEGIN
+    INSERT INTO Leaderboard(`Username`) VALUES(NEW.Username);
+    INSERT INTO player_achievements(`Username`) VALUES(NEW.Username);
+    END; &&
+DELIMITER ;
+
+DELIMITER &&
+CREATE PROCEDURE update_score(IN accuracy FLOAT, IN kills INT, IN cur_user VARCHAR(50))
+	BEGIN
+    UPDATE Leaderboard SET Score = Score + (accuracy*10 + total_kills) WHERE Username = cur_user;
+    END; &&
+DELIMITER ;
