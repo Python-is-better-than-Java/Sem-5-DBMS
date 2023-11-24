@@ -1,6 +1,7 @@
 import pygame
 from pygame.font import SysFont
 import time
+import random
 import mysql.connector
 pygame.init()
 
@@ -82,6 +83,12 @@ def gameplay(screen, player_name, map_image, enemy_colour):
             bullet_coord.append([player.x + 25, player.y + 25, p_dir[0], p_dir[1], s_bullet[direction]])
             bullet_coord_rect.append(pygame.Rect(player.x + 25, player.y + 25, 50, 10))
             shots_fired += 1
+            start = end
+        
+        if (end - start >= 18):
+            enemy.append(pygame.transform.scale([enemy1, enemy2][random.randint(0, 1)], [100, 100]))
+            enemy_rect.append(pygame.Rect([random.choice([10, 200]), random.choice([10, 200]), 100, 100]))
+            enemy_health.append(200)
             start = end
 
         pygame.draw.ellipse(screen, (0, 125, 0), player)
