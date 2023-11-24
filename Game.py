@@ -5,6 +5,9 @@ import random
 import mysql.connector
 pygame.init()
 
+conn = mysql.connector.connect(host="localhost", user="root", password="S@ah1th!", database="shootergame")
+cur = conn.cursor()
+
 def check_dir(p_dir): # To check which direction player is facing
     if (p_dir == 0):   # Player facing up
         return (0, -10) 
@@ -30,7 +33,10 @@ def gameplay(screen, player_name, map_image, enemy_colour):
     a_bullet = (pygame.transform.rotate(pygame.transform.scale(a_bullet, (30, 10)), 90), pygame.transform.rotate(pygame.transform.scale(a_bullet, (30, 10)), 180), pygame.transform.rotate(pygame.transform.scale(a_bullet, (30, 10)), 270), pygame.transform.scale(a_bullet, (30, 10)))
     s_bullet = pygame.image.load("Bullets/Sniper_bullet.png")
     s_bullet = (pygame.transform.rotate(pygame.transform.scale(s_bullet, (50, 10)), 90), pygame.transform.rotate(pygame.transform.scale(s_bullet, (50, 10)), 180), pygame.transform.rotate(pygame.transform.scale(s_bullet, (50, 10)), 270), pygame.transform.scale(s_bullet, (50, 10)))
-    
+
+    cur.execute("SELECT W_type, Damage FROM Weapons;")
+    bullet_damage = cur.fetchall()
+
     enemy1 = pygame.image.load(f"Enemies/{enemy_colour}/Enemy1.jpg")
     enemy2 = pygame.image.load(f"Enemies/{enemy_colour}/Enemy2.jpg")
     enemy3 = pygame.image.load(f"Enemies/{enemy_colour}/Enemy3.jpg")
@@ -41,12 +47,14 @@ def gameplay(screen, player_name, map_image, enemy_colour):
     bullet_coord_rect = [] # Bullet rectangles (superimposed with bullet images always) so that collision can be checked with enemy rectangle
     direction = 3  # used as p_dir arguement in check_dir, default facing right
     start = end = time.time() # start reload time, end - start = number of seconds left to reload (in seconds)
+    enemy_spawn_start = enemy_spawn_end = time.time()
     true = True
 
     while true == True:
         screen.fill((0, 0, 0)) 
         screen.blit(game_map, (0,0))
         end = time.time()
+        enemy_spawn_end = time.time()
         for event in pygame.event.get():
             if (event.type == pygame.QUIT):
                 true = False
@@ -71,26 +79,38 @@ def gameplay(screen, player_name, map_image, enemy_colour):
             player.y = 325
 
         if (key[pygame.K_1] and (end - start >= 0.75)): # pistol bullet fired
-            bullet_coord.append([player.x + 25, player.y + 25, p_dir[0], p_dir[1], p_bullet[direction]])
+            p_damage = 0
+            for dam in bullet_damage:
+                if dam[0] == "Pistol":
+                    p_damage = dam[1]
+            bullet_coord.append([player.x + 25, player.y + 25, p_dir[0], p_dir[1], p_bullet[direction], p_damage])
             bullet_coord_rect.append(pygame.Rect(player.x + 25, player.y + 25, 20, 10))
             shots_fired += 1
             start = end
         if (key[pygame.K_2] and (end - start >= 0.2)): # assault rifle bullet fired
-            bullet_coord.append([player.x + 25, player.y + 25, p_dir[0], p_dir[1], a_bullet[direction]])
+            a_damage = 0
+            for dam in bullet_damage:
+                if dam[0] == "Assault Rifle":
+                    a_damage = dam[1]
+            bullet_coord.append([player.x + 25, player.y + 25, p_dir[0], p_dir[1], a_bullet[direction], a_damage])
             bullet_coord_rect.append(pygame.Rect(player.x + 25, player.y + 25, 30, 10))
             shots_fired += 1
             start = end
         if (key[pygame.K_3] and (end - start >= 2)): # sniper rifle bullet fired
-            bullet_coord.append([player.x + 25, player.y + 25, p_dir[0], p_dir[1], s_bullet[direction]])
+            s_damage = 0
+            for dam in bullet_damage:
+                if dam[0] == "Sniper":
+                    s_damage = dam[1]
+            bullet_coord.append([player.x + 25, player.y + 25, p_dir[0], p_dir[1], s_bullet[direction], s_damage])
             bullet_coord_rect.append(pygame.Rect(player.x + 25, player.y + 25, 50, 10))
             shots_fired += 1
             start = end
         
-        if (end - start >= 18):
+        if (enemy_spawn_end - enemy_spawn_start >= 6):
             enemy.append(pygame.transform.scale([enemy1, enemy2][random.randint(0, 1)], [100, 100]))
             enemy_rect.append(pygame.Rect([random.choice([10, 200]), random.choice([10, 200]), 100, 100]))
             enemy_health.append(200)
-            start = end
+            enemy_spawn_start = enemy_spawn_end
 
         pygame.draw.ellipse(screen, (0, 125, 0), player)
         
@@ -125,12 +145,13 @@ def gameplay(screen, player_name, map_image, enemy_colour):
                 if (bullet_rect.colliderect(enemy_rect_i)): # bullet collide with enemy
                     bullet_coord_rect.remove(bullet_rect) # Remove bullet rectangle
                     bullet_coord.remove(bullet) # Remove bullet image
-                    if enemy_health[enemy.index(enemy_i)] == 0:
+                    if enemy_health[enemy.index(enemy_i)] <= 0:
                         enemy_rect.remove(enemy_rect_i) # Remove red enemy rectangle
+                        enemy_health.remove(enemy_health[enemy.index(enemy_i)])
                         enemy.remove(enemy_i) # remove red enemy image
                         kills += 1
                     else:
-                        enemy_health[enemy.index(enemy_i)] -= 50
+                        enemy_health[enemy.index(enemy_i)] -= bullet[5]
                     shots_hit += 1
             
             if(enemy_rect_i.colliderect(player)):
@@ -150,8 +171,6 @@ def gameplay(screen, player_name, map_image, enemy_colour):
 def game_over(screen, shots_fired, shots_hit, kills, player_name):
     true = True
     accuracy = shots_hit/shots_fired if shots_fired > 0 else 0
-    conn = mysql.connector.connect(host="localhost", user="root", password="S@ah1th!", database="shootergame")
-    cur = conn.cursor()
     query = f"SELECT Username FROM player_statistics WHERE Username = '{player_name}';"
     cur.execute(query)
     results = cur.fetchall()
@@ -169,7 +188,6 @@ def game_over(screen, shots_fired, shots_hit, kills, player_name):
         conn.commit()
         
     while true == True:
-        return_mouse_pos = pygame.mouse.get_pos()
         screen.fill((125, 0, 0))
         game_over_text = SysFont("Calibri", 70).render("Game Over", True, "White")
         accuracy_text = SysFont("Calibri", 50).render("Accuracy: {}".format(accuracy), True, "White")
