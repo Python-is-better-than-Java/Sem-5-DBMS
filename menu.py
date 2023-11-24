@@ -8,7 +8,7 @@ screen = pygame.display.set_mode((1000, 770))
 pygame.display.set_caption("PRAAJEQT")
 
 # Create a connection object
-conn_new = mysql.connector.connect(host="localhost", user="root", password="mysql", database="shootergame")
+conn_new = mysql.connector.connect(host="localhost", user="root", password="S@ah1th!", database="shootergame")
 cursor_new = conn_new.cursor()
 
 class Button():
