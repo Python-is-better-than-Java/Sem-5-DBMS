@@ -131,6 +131,7 @@ def gameplay(screen, player_name, map_image, enemy_colour):
                 else:
                     true = False
                     game_over(screen, shots_fired, shots_hit, kills, player_name)
+                    return
         
         PLAYER_NAME = SysFont("Calibri", 45).render(player_name, True, "White")
         screen.blit(PLAYER_NAME, (500, 720)) # display player name below the game screen
@@ -139,8 +140,9 @@ def gameplay(screen, player_name, map_image, enemy_colour):
         pygame.time.Clock().tick(30)
 
 def game_over(screen, shots_fired, shots_hit, kills, player_name):
+    true = True
     accuracy = shots_hit/shots_fired if shots_fired > 0 else 0
-    conn = mysql.connector.connect(host="localhost", user="root", password="S@ah1th!", database="shootergame")
+    conn = mysql.connector.connect(host="localhost", user="root", password="mysql", database="shootergame")
     cur = conn.cursor()
     query = f"SELECT Username FROM player_statistics WHERE Username = '{player_name}';"
     cur.execute(query)
@@ -158,7 +160,8 @@ def game_over(screen, shots_fired, shots_hit, kills, player_name):
         cur.execute(query)
         conn.commit()
         
-    while True:
+    while true == True:
+        return_mouse_pos = pygame.mouse.get_pos()
         screen.fill((125, 0, 0))
         game_over_text = SysFont("Calibri", 70).render("Game Over", True, "White")
         accuracy_text = SysFont("Calibri", 50).render("Accuracy: {}".format(accuracy), True, "White")
@@ -172,5 +175,10 @@ def game_over(screen, shots_fired, shots_hit, kills, player_name):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
+            
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                true = False
+                return
+
         pygame.display.flip()
 #gameplay()

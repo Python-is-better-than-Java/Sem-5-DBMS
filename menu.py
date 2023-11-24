@@ -8,7 +8,7 @@ screen = pygame.display.set_mode((1000, 770))
 pygame.display.set_caption("PRAAJEQT")
 
 # Create a connection object
-conn_new = mysql.connector.connect(host="localhost", user="root", password="S@ah1th!", database="shootergame")
+conn_new = mysql.connector.connect(host="localhost", user="root", password="mysql", database="shootergame")
 cursor_new = conn_new.cursor()
 
 class Button():
@@ -246,16 +246,19 @@ def map_mode_page(player_name):
                     cursor_new.execute(query)
                     result = cursor_new.fetchall()
                     gameplay(screen, player_name, "Map/DesertMap.jpg", str(result[0][0]))
+                    home_screen()
                 if GRASSLAND_BUTTON.checkForInput(home_mouse_pos):
                     query = f"SELECT Enemy_Colour FROM Map WHERE M_type = 'Grass';"
                     cursor_new.execute(query)
                     result = cursor_new.fetchall()
                     gameplay(screen, player_name, "Map/GrassMap.jpg", str(result[0][0]))
+                    home_screen()
                 if ICE_BUTTON.checkForInput(home_mouse_pos):
                     query = f"SELECT Enemy_Colour FROM Map WHERE M_type = 'Ice';"
                     cursor_new.execute(query)
                     result = cursor_new.fetchall()
                     gameplay(screen, player_name, "Map/IceMap.jpg", str(result[0][0]))
+                    home_screen()
 
         pygame.display.update()
 
