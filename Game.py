@@ -170,6 +170,7 @@ def gameplay(screen, player_name, map_image, enemy_colour):
 
 def game_over(screen, shots_fired, shots_hit, kills, player_name):
     true = True
+    achievement_message = ""
     accuracy = shots_hit/shots_fired if shots_fired > 0 else 0
     query = f"SELECT Username FROM player_statistics WHERE Username = '{player_name}';"
     cur.execute(query)
@@ -184,6 +185,25 @@ def game_over(screen, shots_fired, shots_hit, kills, player_name):
         conn.commit()
 
         query = f"UPDATE player_statistics SET Kills = {kills} WHERE Username = '{player_name}';"
+        cur.execute(query)
+        conn.commit()
+    
+    if kills >= 50 and kills < 100:
+        achievement_message = "Gold"
+    elif kills >= 100 and kills < 150:
+        achievement_message = "Platinum"
+    else:
+        achievement_message = "Diamond"
+    
+    query = f"SELECT Username FROM player_achievements WHERE Username = '{player_name}';"
+    cur.execute(query)
+    results = cur.fetchall()
+    if len(results) == 0:
+        query = f"INSERT INTO player_achievements VALUES('{player_name}', '{achievement_message}')"
+        cur.execute(query)
+        conn.commit()
+    else:
+        query = f"UPDATE player_achievements SET Achievements = '{achievement_message}' WHERE Username = '{player_name}'"
         cur.execute(query)
         conn.commit()
         
