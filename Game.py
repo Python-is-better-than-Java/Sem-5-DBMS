@@ -107,7 +107,7 @@ def gameplay(screen, player_name, map_image, enemy_colour):
             start = end
         
         if (enemy_spawn_end - enemy_spawn_start >= 6):
-            enemy.append(pygame.transform.scale([enemy1, enemy2][random.randint(0, 1)], [100, 100]))
+            enemy.append(pygame.transform.scale([enemy1, enemy2, enemy3][random.randint(0, 2)], [100, 100]))
             enemy_rect.append(pygame.Rect([random.choice([10, 200]), random.choice([10, 200]), 100, 100]))
             enemy_health.append(200)
             enemy_spawn_start = enemy_spawn_end
