@@ -14,9 +14,9 @@ def check_dir(p_dir): # To check which direction player is facing
     else:              # Player facing right
         return (10, 0)
 
-def gameplay(screen, player_name):
+def gameplay(screen, player_name, map_image):
     pygame.display.set_caption("PRAAJEQT")
-    game_map = pygame.transform.scale(pygame.image.load("DesertMap.jpg"), (1000, 700))
+    game_map = pygame.transform.scale(pygame.image.load(map_image), (1000, 700))
     player = pygame.Rect(475, 325, 50, 50)
     player_health = 500
     shots_fired = 0
@@ -145,7 +145,7 @@ def gameplay(screen, player_name):
 
 def game_over(screen, shots_fired, shots_hit, kills, player_name):
     accuracy = shots_hit/shots_fired if shots_fired > 0 else 0
-    conn = mysql.connector.connect(host="localhost", user="root", password="S@ah1th!", database="shootergame")
+    conn = mysql.connector.connect(host="localhost", user="root", password="mysql", database="shootergame")
     cur = conn.cursor()
     query = f"INSERT INTO player_statistics VALUES ('{player_name}', {accuracy}, {kills}, 1);"
     cur.execute(query)
