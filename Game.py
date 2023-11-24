@@ -32,9 +32,10 @@ def gameplay(screen, player_name, map_image, enemy_colour):
     
     enemy1 = pygame.image.load(f"Enemies/{enemy_colour}/Enemy1.jpg")
     enemy2 = pygame.image.load(f"Enemies/{enemy_colour}/Enemy2.jpg")
-    enemy = [pygame.transform.scale(enemy1, [100, 100]), pygame.transform.scale(enemy2, [100, 100])] # Red enemy images
-    enemy_rect = [pygame.Rect([200, 10, 100, 100]), pygame.Rect([200, 200, 100, 100])] # add new pygame.Rect here for red enemies
-    enemy_health = [200, 200]
+    enemy3 = pygame.image.load(f"Enemies/{enemy_colour}/Enemy3.jpg")
+    enemy = [pygame.transform.scale(enemy1, [100, 100]), pygame.transform.scale(enemy2, [100, 100]), pygame.transform.scale(enemy3, [100, 100])] # Red enemy images
+    enemy_rect = [pygame.Rect([200, 10, 100, 100]), pygame.Rect([200, 200, 100, 100]), pygame.Rect([200, 400, 100, 100])] # add new pygame.Rect here for red enemies
+    enemy_health = [200, 200, 200]
     bullet_coord = [] # coordinates of every bullet (can take inspiration of implementation to make enemy images move) -> [x_coord, y_coord, facing left/right, facing up/down, bullet image]
     bullet_coord_rect = [] # Bullet rectangles (superimposed with bullet images always) so that collision can be checked with enemy rectangle
     direction = 3  # used as p_dir arguement in check_dir, default facing right
@@ -142,7 +143,7 @@ def gameplay(screen, player_name, map_image, enemy_colour):
 def game_over(screen, shots_fired, shots_hit, kills, player_name):
     true = True
     accuracy = shots_hit/shots_fired if shots_fired > 0 else 0
-    conn = mysql.connector.connect(host="localhost", user="root", password="mysql", database="shootergame")
+    conn = mysql.connector.connect(host="localhost", user="root", password="S@ah1th!", database="shootergame")
     cur = conn.cursor()
     query = f"SELECT Username FROM player_statistics WHERE Username = '{player_name}';"
     cur.execute(query)
