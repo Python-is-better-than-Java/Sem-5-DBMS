@@ -6,7 +6,7 @@ st.set_page_config(page_title = "Shooter Game")
 st.title("Shooter Game Tables")
 
 # Create a connection object
-conn = mysql.connector.connect(host="localhost", user="root", password="S@ah1th!", database="shootergame")
+conn = mysql.connector.connect(host="localhost", user="root", password="mysql", database="shootergame")
 cursor = conn.cursor()
 
 options = st.selectbox("Select a table to view:", ("Player Profile", "Player Statistics", "Player Achievements", "Map", "Weapons", "Items", "Leaderboard"))

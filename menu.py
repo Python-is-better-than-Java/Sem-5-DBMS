@@ -8,7 +8,7 @@ screen = pygame.display.set_mode((1000, 770))
 pygame.display.set_caption("PRAAJEQT")
 
 # Create a connection object
-conn_new = mysql.connector.connect(host="localhost", user="root", password="S@ah1th!", database="shootergame")
+conn_new = mysql.connector.connect(host="localhost", user="root", password="mysql", database="shootergame")
 cursor_new = conn_new.cursor()
 
 class Button():
@@ -98,7 +98,7 @@ def login_page():
                     cursor_new.execute(query)
                     results = cursor_new.fetchall()
                     if (len(results) > 0):
-                        gameplay(screen, player_name)
+                        map_mode_page(player_name)
                     else:
                         enter_again = "Incorrect username and/or password. Try Again."
                         key = 0 # Reset to entering username
@@ -214,6 +214,41 @@ def signup_page():
                             pswd_prev_len = len(password)
 
         pygame.display.flip()
+
+def map_mode_page(player_name):
+    while True:
+        screen.fill((125, 0, 0))
+
+        home_mouse_pos = pygame.mouse.get_pos()
+
+        home_text = SysFont("Calibri", 70).render("Start Game", True, "White")
+        home_button = home_text.get_rect(center=(500, 50))
+
+        DESERT_BUTTON = Button(image=pygame.image.load("Rectangle.png"), pos=(500, 200), 
+                            text_input="Desert", font=SysFont("Calibri", 70), base_color="#d7fcd4", hovering_color="Green")
+        GRASSLAND_BUTTON = Button(image=pygame.image.load("Rectangle.png"), pos=(500, 350), 
+                            text_input="Grassland", font=SysFont("Calibri", 70), base_color="#d7fcd4", hovering_color="Green")
+        ICE_BUTTON = Button(image=pygame.image.load("Rectangle.png"), pos=(500, 500),
+                            text_input="Ice", font=SysFont("Calibri", 70), base_color="#d7fcd4", hovering_color="Green")
+
+        screen.blit(home_text, home_button)
+
+        for button in [DESERT_BUTTON, GRASSLAND_BUTTON, ICE_BUTTON]:
+            button.changeColor(home_mouse_pos)
+            button.update(screen)
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if DESERT_BUTTON.checkForInput(home_mouse_pos):
+                    gameplay(screen, player_name, "DesertMap.jpg")
+                if GRASSLAND_BUTTON.checkForInput(home_mouse_pos):
+                    gameplay(screen, player_name, "GrasslandMap.jpg")
+                if ICE_BUTTON.checkForInput(home_mouse_pos):
+                    gameplay(screen, player_name, "IceMap.jpg")
+
+        pygame.display.update()
 
 def home_screen():
     while True:
